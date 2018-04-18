@@ -1,6 +1,5 @@
 '''
 Programming Task 2: Hashing
-@authors: Yonathan (yf2ey), [ add your names and ids]
 
 This is our implementation of a hash data structure.
 It uses a file as input with the following specs:
@@ -13,7 +12,6 @@ It uses a file as input with the following specs:
 
 class HashTable:
     ''' A class to hold together all the functions nicely '''
-    
 
     def __init__(self, num_buckets, rec_buckets):
 
@@ -23,17 +21,17 @@ class HashTable:
         self.overflow_counter = num_buckets
 
         # create the table
-        self.table = [[[] for _ in range(rec_buckets+1)]
+        self.table = [[[] for _ in range(rec_buckets + 1)]
                       for _ in range(num_buckets)]
 
     def create_overflow_bucket(self, bucket):
         ''' when there are more records in a bucket than
             expected, this method will create an extra
             bucket to handle the overflow '''
-        
-        self.table.append([[] for _ in range(self.rec_buckets+1)])
-        self.overflow_counter = self.overflow_counter +1
-        self.table[[bucket][self.rec_buckets+1]]=self.overflow_counter
+
+        self.table.append([[] for _ in range(self.rec_buckets + 1)])
+        self.overflow_counter = self.overflow_counter + 1
+        self.table[bucket][self.rec_buckets] = self.overflow_counter - 1
 
     def hash_function(self, key):
         ''' hashes a given key using our function '''
@@ -46,12 +44,15 @@ class HashTable:
         return ascii_sum % self.num_buckets
 
     def find_bucket(self, hash_key):
-        bucket = self.table[key_hash]
-        if not bucket(self.rec_buckets+1):
+        ''' finds a bucket '''
+
+        bucket = self.table[hash_key]
+
+        if not bucket[self.rec_buckets]:
             return bucket
-        else:
-            find_bucket(bucket(self.rec_buckets+1))
-            
+
+        return self.find_bucket(bucket[self.rec_buckets])
+
     def insert(self, key):
         ''' inserts a key into the hash table '''
 
@@ -61,27 +62,19 @@ class HashTable:
         # get the bucket
         bucket = self.find_bucket(key_hash)
 
-        if bucket(self.rec_buckets): #check if the bucket is full
-            # the bucket is full
-            if not bucket(self.rec_buckets+1):
-                self.create_overflow_bucket(key_hash)
-            else:
-                bucket = self.table[key_hash]
-        else:
-            # the bucket is not full yet -- insert
-                
-#         # try to find a record
-#         for record in range(self.rec_buckets):
+        if bucket[-2]:  #check if the bucket is full
+            self.create_overflow_bucket(key_hash)
+            bucket = self.find_bucket(key_hash)
 
-#             # found empty record, put it in and exit
-#             if not bucket(record):
-#                 record.append(key)
-#                 return True
+        # try to find a record
+        for record in range(self.rec_buckets):
 
-        
+            # found empty record, put it in and exit
+            if not bucket[record]:
+                bucket[record].append(key)
+                return True
 
-        # try again
-        self.insert(key)
+        return False
 
     def print_table(self):
         ''' prints the table in a nice format '''
