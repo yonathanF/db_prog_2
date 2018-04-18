@@ -1,6 +1,6 @@
 '''
 Programming Task 2: Hashing
-@authors: Yonathan (yf2ey)
+@authors: Yonathan (yf2ey), [ add your names and ids]
 
 This is our implementation of a hash data structure.
 It uses a file as input with the following specs:
@@ -74,6 +74,9 @@ class HashTable:
                 print(record, end="\t")
             print("\n")
             print("-" * 20 * self.rec_buckets)
+
+
+###################### everything under this is input management #################
 
 
 def check_errors(num_keys, keys, num_buckets, rec_buckets):
