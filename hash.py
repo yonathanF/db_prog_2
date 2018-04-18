@@ -1,6 +1,5 @@
 '''
 Programming Task 2: Hashing
-@authors: Yonathan (yf2ey), [ add your names and ids]
 
 This is our implementation of a hash data structure.
 It uses a file as input with the following specs:
@@ -19,9 +18,10 @@ class HashTable:
         # save these incase we need them later
         self.num_buckets = num_buckets
         self.rec_buckets = rec_buckets
+        self.overflow_counter = num_buckets
 
         # create the table
-        self.table = [[[] for _ in range(rec_buckets)]
+        self.table = [[[] for _ in range(rec_buckets + 1)]
                       for _ in range(num_buckets)]
 
     def create_overflow_bucket(self, bucket):
@@ -29,7 +29,9 @@ class HashTable:
             expected, this method will create an extra
             bucket to handle the overflow '''
 
-        self.table[bucket].append([])
+        self.table.append([[] for _ in range(self.rec_buckets + 1)])
+        self.overflow_counter = self.overflow_counter + 1
+        self.table[bucket][self.rec_buckets] = self.overflow_counter - 1
 
     def hash_function(self, key):
         ''' hashes a given key using our function '''
@@ -41,6 +43,16 @@ class HashTable:
 
         return ascii_sum % self.num_buckets
 
+    def find_bucket(self, hash_key):
+        ''' finds a bucket '''
+
+        bucket = self.table[hash_key]
+
+        if not bucket[self.rec_buckets]:
+            return bucket
+
+        return self.find_bucket(bucket[self.rec_buckets])
+
     def insert(self, key):
         ''' inserts a key into the hash table '''
 
@@ -48,21 +60,21 @@ class HashTable:
         key_hash = self.hash_function(key)
 
         # get the bucket
-        bucket = self.table[key_hash]
+        bucket = self.find_bucket(key_hash)
+
+        if bucket[-2]:  #check if the bucket is full
+            self.create_overflow_bucket(key_hash)
+            bucket = self.find_bucket(key_hash)
 
         # try to find a record
-        for record in bucket:
+        for record in range(self.rec_buckets):
 
             # found empty record, put it in and exit
-            if not record:
-                record.append(key)
+            if not bucket[record]:
+                bucket[record].append(key)
                 return True
 
-        # couldn't find any empty record if we reach this
-        self.create_overflow_bucket(key_hash)
-
-        # try again
-        self.insert(key)
+        return False
 
     def print_table(self):
         ''' prints the table in a nice format '''
